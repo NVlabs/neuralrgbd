@@ -37,8 +37,11 @@ git clone https://github.com/NVlabs/neuralrgbd.git
 
 Create an [Anaconda](https://www.anaconda.com/distribution/) environment and install the dependencies:
 ```
+# (optional) create a new environment if needed
 conda create --name neuralrgbd
 conda activate neuralrgbd
+
+# install the the dependencies 
 conda install pip
 pip install -r requirements.txt
 ```
