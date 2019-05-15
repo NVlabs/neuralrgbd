@@ -12,7 +12,6 @@ author: Chao Liu <chaoliu1@cs.cmu.edu>
 import numpy as np 
 import subprocess 
 import mutils.misc as misc
-import ipdb
 
 
 def read_trajM_fromMat(mat_file, filt_win = 21, filt_ord = 3, returnRaw=False):
