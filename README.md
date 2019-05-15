@@ -140,7 +140,6 @@ In the `code` folder
 ```
 sh local_train_scanNet.sh
 ``` 
-You need to change the dataset path for ScanNet. See [this](./docs/TR.md) page for more details
-[Chao Liu](http://www.cs.cmu.edu/~ILIM/people/chaoliu1/)
+You need to change the dataset path for ScanNet. See [this](./docs/TR.md) page for more details.
 ## Contact
 If you have any questions, please contact the primary author [Chao Liu &lt;chao.liu@cs.cmu.edu>](mailto:chao.liu@cs.cmu.edu), or [Kihwan Kim &lt;kihwank@nvidia.com>](mailto:kihwank@nvidia.com).
