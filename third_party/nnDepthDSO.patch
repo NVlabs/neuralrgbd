@@ -1,0 +1,169 @@
+diff --git a/dso/src/FullSystem/FullSystem.cpp b/dso/src/FullSystem/FullSystem.cpp
+index 516f6cc..6dfa40a 100644
+--- a/dso/src/FullSystem/FullSystem.cpp
++++ b/dso/src/FullSystem/FullSystem.cpp
+@@ -49,9 +49,7 @@
+ 
+ #include "OptimizationBackend/EnergyFunctional.h"
+ #include "OptimizationBackend/EnergyFunctionalStructs.h"
+-
+ #include "IOWrapper/Output3DWrapper.h"
+-
+ #include "util/ImageAndExposure.h"
+ 
+ #include <cmath>
+@@ -63,7 +61,6 @@ int PointHessian::instanceCounter=0;
+ int CalibHessian::instanceCounter=0;
+ 
+ 
+-
+ FullSystem::FullSystem()
+ {
+ 
+@@ -251,11 +248,20 @@ void FullSystem::printResult(std::string file)
+ 	myfile.open (file.c_str());
+ 	myfile << std::setprecision(15);
+ 
++	int ii =0;
+ 	for(FrameShell* s : allFrameHistory)
+ 	{
+-		if(!s->poseValid) continue;
++		printf(" printResult(): ii %d\n", ii);
++		ii++;
+ 
+-		if(setting_onlyLogKFPoses && s->marginalizedAt == s->id) continue;
++		if(!s->poseValid){ 
++//			myfile <<  " " << "InvalidPose" << "\n";
++//				continue;
++		}
++
++		if(setting_onlyLogKFPoses && s->marginalizedAt == s->id){
++				continue;
++		}
+ 
+ 		myfile << s->timestamp <<
+ 			" " << s->camToWorld.translation().transpose()<<
+@@ -312,7 +318,7 @@ Vec4 FullSystem::trackNewCoarse(FrameHessian* fh)
+ 		// just try a TON of different initializations (all rotations). In the end,
+ 		// if they don't work they will only be tried on the coarsest level, which is super fast anyway.
+ 		// also, if tracking rails here we loose, so we really, really want to avoid that.
+-		for(float rotDelta=0.02; rotDelta < 0.05; rotDelta++)
++		for(float rotDelta=0.02; rotDelta < 0.05; rotDelta+=.01)
+ 		{
+ 			lastF_2_fh_tries.push_back(fh_2_slast.inverse() * lastF_2_slast * SE3(Sophus::Quaterniond(1,rotDelta,0,0), Vec3(0,0,0)));			// assume constant motion.
+ 			lastF_2_fh_tries.push_back(fh_2_slast.inverse() * lastF_2_slast * SE3(Sophus::Quaterniond(1,0,rotDelta,0), Vec3(0,0,0)));			// assume constant motion.
+@@ -897,7 +903,8 @@ void FullSystem::addActiveFrame( ImageAndExposure* image, int id )
+ 
+ 
+ 		lock.unlock();
+-		deliverTrackedFrame(fh, needToMakeKF);
++//		deliverTrackedFrame(fh,needToMakeKF);
++		deliverTrackedFrame(fh,true);
+ 		return;
+ 	}
+ }
+diff --git a/dso/src/main_dso_pangolin.cpp b/dso/src/main_dso_pangolin.cpp
+index c6172f8..4f56a7a 100644
+--- a/dso/src/main_dso_pangolin.cpp
++++ b/dso/src/main_dso_pangolin.cpp
+@@ -1,6 +1,6 @@
+ /**
+ * This file is part of DSO.
+-* 
++*
+ * Copyright 2016 Technical University of Munich and Intel.
+ * Developed by Jakob Engel <engelj at in dot tum dot de>,
+ * for more information see <http://vision.in.tum.de/dso>.
+@@ -113,7 +113,6 @@ void settingsDefault(int preset)
+ 		setting_maxFrames = 7;
+ 		setting_maxOptIterations=6;
+ 		setting_minOptIterations=1;
+-
+ 		setting_logStuff = false;
+ 	}
+ 
+@@ -128,15 +127,24 @@ void settingsDefault(int preset)
+ 
+ 		playbackSpeed = (preset==2 ? 0 : 5);
+ 		preload = preset==3;
+-		setting_desiredImmatureDensity = 600;
+-		setting_desiredPointDensity = 800;
+-		setting_minFrames = 4;
+-		setting_maxFrames = 6;
+-		setting_maxOptIterations=4;
++		setting_desiredImmatureDensity = 200;
++		setting_desiredPointDensity = 400;
++		setting_minFrames = 5;
++		setting_maxFrames = 7;
++		setting_maxOptIterations= 100;
+ 		setting_minOptIterations=1;
+ 
+-		benchmarkSetting_width = 424;
+-		benchmarkSetting_height = 320;
++		//scanNet //
++		// For videos, lower resolution performs better (and faster)
++		benchmarkSetting_width = 336; //good value
++		benchmarkSetting_height = 252;
++		// benchmarkSetting_width = 192;//bad value
++		// benchmarkSetting_height = 128;
++
++
++
++		// benchmarkSetting_width = 324;
++		// benchmarkSetting_height = 242;
+ 
+ 		setting_logStuff = false;
+ 	}
+@@ -144,11 +152,6 @@ void settingsDefault(int preset)
+ 	printf("==============================================\n");
+ }
+ 
+-
+-
+-
+-
+-
+ void parseArgument(char* arg)
+ {
+ 	int option;
+@@ -193,8 +196,6 @@ void parseArgument(char* arg)
+ 		return;
+ 	}
+ 
+-
+-
+ 	if(1==sscanf(arg,"noros=%d",&option))
+ 	{
+ 		if(option==1)
+@@ -489,7 +490,9 @@ int main( int argc, char** argv )
+ 
+ 
+ 
+-            if(!skipFrame) fullSystem->addActiveFrame(img, i);
++            if(true) fullSystem->addActiveFrame(img, i);
++			printf("ii: %d, idsToPlay: %d \n", ii, (int)idsToPlay.size() );
++//             fullSystem->addActiveFrame(img, i);
+ 
+ 
+ 
+@@ -533,7 +536,6 @@ int main( int argc, char** argv )
+ 
+         fullSystem->printResult("result.txt");
+ 
+-
+         int numFramesProcessed = abs(idsToPlay[0]-idsToPlay.back());
+         double numSecondsProcessed = fabs(reader->getTimestamp(idsToPlay[0])-reader->getTimestamp(idsToPlay.back()));
+         double MilliSecondsTakenSingle = 1000.0f*(ended-started)/(float)(CLOCKS_PER_SEC);
+diff --git a/dso/src/util/settings.cpp b/dso/src/util/settings.cpp
+index 486cba5..55918eb 100644
+--- a/dso/src/util/settings.cpp
++++ b/dso/src/util/settings.cpp
+@@ -189,7 +189,7 @@ bool disableReconfigure=false;
+ bool debugSaveImages = false;
+ bool multiThreading = true;
+ bool disableAllDisplay = false;
+-bool setting_onlyLogKFPoses = true;
++bool setting_onlyLogKFPoses = false;
+ bool setting_logStuff = true;
+ 
+ 
