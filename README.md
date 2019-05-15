@@ -30,9 +30,9 @@ An exception is the evaluation code in the ``third_party`` folder.
 
 
 ## Getting Started 
-Clone repository, suppose the account name on bitbucket is `YOURACCOUNT`:
+Clone repository: 
 ```
-git clone https://YOURACCOUNT@github.com/NVlabs/neuralrgbd.git
+git clone https://github.com/NVlabs/neuralrgbd.git
 ```
 
 Create an [Anaconda](https://www.anaconda.com/distribution/) environment and install the dependencies:
