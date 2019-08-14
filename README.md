@@ -137,6 +137,7 @@ In the `code` folder
 sh local_train_kitti.sh
 ``` 
 You need to change the dataset path KITTI. See [this](./docs/TR.md) page for more details.
+Note that in the paper, we use the projected depth map from every 5 frames for denser depth maps.
 
 ##### Train on ScanNet 
 In the `code` folder
