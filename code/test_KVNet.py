@@ -52,7 +52,7 @@ def main():
 
     # about testing # 
     parser.add_argument('--model_path', type=str, required=True, help='The pre-trained model path for KV-net')
-    parser.add_argument('--split_file', type=str, default='.', help='The split txt file')
+    parser.add_argument('--split_file', type=str, required=True, help='The split txt file')
     parser.add_argument('--frame_interv', default=5, type=int, help='frame interval') 
     parser.add_argument('--t_win', type=int, default = 2, help='The radius of the temporal window; default=2') 
     parser.add_argument('--d_min', type=float, default=0, help='The minimal depth value; default=0') 
@@ -87,7 +87,6 @@ def main():
     if dataset_name == 'scanNet':
         import mdataloader.scanNet as dl_scanNet
         dataset_init = dl_scanNet.ScanNet_dataset 
-        split_file = './mdataloader/scanNet_split/scannet_val.txt' if args.split_file=='.' else args.split_file
         fun_get_paths =  lambda traj_indx: dl_scanNet.get_paths(traj_indx, frame_interv=5, 
                                                                 split_txt = split_file,
                                                                 database_path_base = dataset_path) 
@@ -115,7 +114,6 @@ def main():
     elif dataset_name == 'kitti':
         import mdataloader.kitti as dl_kitti
         dataset_init = dl_kitti.KITTI_dataset
-        split_file = './mdataloader/kitti_split/test_eigen.txt' if args.split_file=='.' else args.split_file
         fun_get_paths = lambda traj_indx: dl_kitti.get_paths(traj_indx, split_txt= split_file, mode='val')
         if not dataset_path == '.':
             fun_get_paths = lambda traj_indx: dl_kitti.get_paths(traj_indx, split_txt= split_file,
