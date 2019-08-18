@@ -81,6 +81,8 @@ def main():
     d_candi_dmap_ref = d_candi
     nDepth_dmap_ref = nDepth 
 
+    split_file = args.split_file
+
 
     # ===== Dataset selection ======== #
     dataset_path = args.dataset_path
